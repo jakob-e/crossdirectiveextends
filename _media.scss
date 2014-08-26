@@ -1,0 +1,33 @@
+
+  // ================================================
+  // SCSS @extends Across Media Queries  
+  // More info: http://codepen.io/jakob-e/pen/jKyuq  
+  // ================================================  
+  
+  // Simple media mixin - without the overthinking
+  // of breakpoint libraries - sorry guys ;)
+  $_current_breakpoint_key:'';
+  @mixin media($breakpointkeys...){
+    @each $key, $value in $breakpointkeys {
+      $_current_breakpoint_key:$key !global;
+      @media #{map-get($breakpoints,$key)}{ @content; }
+    }
+  };
+  
+  // Mixin to add extends to each media query   
+  @mixin extends(){ 
+    @content; 
+    @each $key, $value in $breakpoints { 
+      @include media($key){ @content; } 
+    } 
+  }
+  // Mixin to create cross media extends
+  @mixin new-extend($name){ 
+    %#{ $_current_breakpoint_key + $name}{ @content; } 
+  }
+  // Mixin to handle cross media extend
+  @mixin extend($name){ 
+    & { 
+      @extend %#{ $_current_breakpoint_key + $name };    
+    }
+  }
