@@ -6,6 +6,7 @@
   
   // Simple media mixin - without the overthinking
   // of breakpoint libraries - sorry guys ;)
+  // 
   $_current_breakpoint_key:'';
   @mixin media($breakpointkeys...){
     @each $key, $value in $breakpointkeys {
