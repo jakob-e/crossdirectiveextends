@@ -3,45 +3,111 @@
   // SCSS @extends Across Media Queries  
   // More info: http://codepen.io/jakob-e/pen/jKyuq  
   // ================================================  
-  
-  
-  // Variable to keep the current media context
-  $__current_breakpoint_key: '';
-  
-  // Simple media mixin 
-  @mixin media($breakpointkeys...){
-    @each $key , $value in $breakpointkeys {
-        $__current_breakpoint_key: $key !global; // set flag on enter
-        @media #{map-get($breakpoints, $key)}{ @content; }    
-        $__current_breakpoint_key: '' !global;  // reset on exit
+  // Define your breakpoints
+    $breakpoints:(
+          all     :'all'
+        , mobile  :'(max-width: 480px)'
+        , palm    :'(min-width: 481px) and (max-width: 680px)'
+        , tablet  :'(min-width: 681px) and (max-width: 960px)'
+        , desktop :'(min-width: 961px) and (max-width: 1200px)'
+        , large   :'(min-width: 1201px)' 
+    ); 
+      
+    // Variable to keep the current media context
+    $__current_breakpoint_key: '';
+
+    // Simple media mixin 
+    @mixin media($breakpointkeys...){
+        @each $key , $value in $breakpointkeys {
+            $__current_breakpoint_key: $key !global; // set flag on enter
+            @media #{map-get($breakpoints, $key)}{ @content; }    
+            $__current_breakpoint_key: '' !global;  // reset on exit
+        }
     }
-  }
   
-  // Function to get the current media context 
-  @function media-context(){
-    @return $__current_breakpoint_key; 
-  }
-  
-  // Mixin to clone placeholders to each media directive
-  // - cuts down on the amount of generated media queries :)
-  @mixin extends(){
-    @content;
-    @each $key, $value in $breakpoints {
-        @include media($key){ @content; } 
-    } 
-  }
-  
-  // Mixin to create media placeholders 
-  @mixin new-extend($extend-name){
-    %#{ media-context() + $extend-name }{ @content; }
-  }
-  
-  // Mixin to extend existing media placeholders
-  @mixin extend($extend-name){
-    & {
-        @extend %#{ media-context() + $extend-name }
+    // Function to get the current media context 
+    @function media-context(){
+        @return $__current_breakpoint_key; 
     }
-  }
   
+    // Mixin to clone placeholders to each media directive
+    // - cuts down on the amount of generated media queries :)
+    @mixin extends(){
+        @content;
+        @each $key, $value in $breakpoints {
+            @include media($key){ @content; } 
+        } 
+    }
+  
+    // Mixin to create media placeholders 
+    @mixin new-extend($extend-name){
+        %#{ media-context() + $extend-name }{ @content; }
+    }
+  
+    // Mixin to extend existing media placeholders
+    @mixin extend($extend-name){
+        & {
+            @extend %#{ media-context() + $extend-name }
+        }
+    }
+  
+
+    /*
+    / Test A - root
+    .testA {
+        // All new-extends can be extend like normal
+        // ... or by using @include extend(name)  
+        @extend %foo;           
+        @include extend(bar); 
+    }
+    
+    // Test B - nested 
+    .testB {
+        @include media(mobile){   
+            @include extend(foo);  // Extending inside a media directive
+        }
+        @include media(palm, tablet){
+            @include extend(bar); // Extending inside multiple media directives
+        }
+        @include media(desktop){
+            @include extend(doh);  // Extending an extending extend
+        }
+    }
+    
+    // Test C - wrapped
+    @include media(mobile, tablet){
+        .testC1 { @include extend(foo);  }  
+        .testC2 { @include extend(bar);  }  
+        .testC3 { @include extend(doh);  }  
+    }
+    
+    
+    // CSS - Output
+    .testA { content: ' foo '; context: ""; }
+    .testA { content: ' bar '; context: ""; }
+    
+    @media (max-width: 480px) {
+        .testC3, .testB, .testC1 { content: ' foo ';  context: mobile; }
+        .testC2 { content: ' bar '; context: mobile; }
+        .testC3 { content: ' doh extending foo'; }
+    }
+    
+    @media (min-width: 481px) and (max-width: 680px) {
+        .testB { content: ' bar '; context: palm; }
+    }
+    
+    @media (min-width: 681px) and (max-width: 960px) {
+        .testC3, .testC1 { content: ' foo '; context: tablet; }
+        .testB, .testC2 { content: ' bar '; context: tablet; }
+        .testC3 { content: ' doh extending foo'; }
+    }
+    
+    @media (min-width: 961px) and (max-width: 1200px) {
+        .testB { content: ' foo '; context: desktop; }
+        .testB { content: ' doh extending foo'; }
+    }
+        
+    */
+
 
 
