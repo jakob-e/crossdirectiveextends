@@ -4,31 +4,44 @@
   // More info: http://codepen.io/jakob-e/pen/jKyuq  
   // ================================================  
   
-  // Simple media mixin - without the overthinking
-  // of breakpoint libraries - sorry guys ;)
-  // 
-  $_current_breakpoint_key:'';
-  @mixin media($breakpointkeys...){
-    @each $key, $value in $breakpointkeys {
-      $_current_breakpoint_key:$key !global;
-      @media #{map-get($breakpoints,$key)}{ @content; }
-    }
-  };
   
-  // Mixin to add extends to each media query   
-  @mixin extends(){ 
-    @content; 
-    @each $key, $value in $breakpoints { 
-      @include media($key){ @content; } 
+  // Variable to keep the current media context
+  $__current_breakpoint_key: '';
+  
+  // Simple media mixin 
+  @mixin media($breakpointkeys...){
+    @each $key , $value in $breakpointkeys {
+        $__current_breakpoint_key: $key !global; // set flag on enter
+        @media #{map-get($breakpoints, $key)}{ @content; }    
+        $__current_breakpoint_key: '' !global;  // reset on exit
+    }
+  }
+  
+  // Function to get the current media context 
+  @function media-context(){
+    @return $__current_breakpoint_key; 
+  }
+  
+  // Mixin to clone placeholders to each media directive
+  // - cuts down on the amount of generated media queries :)
+  @mixin extends(){
+    @content;
+    @each $key, $value in $breakpoints {
+        @include media($key){ @content; } 
     } 
   }
-  // Mixin to create cross media extends
-  @mixin new-extend($name){ 
-    %#{ $_current_breakpoint_key + $name}{ @content; } 
+  
+  // Mixin to create media placeholders 
+  @mixin new-extend($extend-name){
+    %#{ media-context() + $extend-name }{ @content; }
   }
-  // Mixin to handle cross media extend
-  @mixin extend($name){ 
-    & { 
-      @extend %#{ $_current_breakpoint_key + $name };    
+  
+  // Mixin to extend existing media placeholders
+  @mixin extend($extend-name){
+    & {
+        @extend %#{ media-context() + $extend-name }
     }
   }
+  
+
+
